@@ -31,6 +31,13 @@
 # Debug files
 *.dSYM/
 
+# Atmel Studio
+/src
+/Debug
+/Release
+*.cproj
+*.xml
+
 # =========================
 # Operating System Files
 # =========================
