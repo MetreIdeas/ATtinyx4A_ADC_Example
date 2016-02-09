@@ -39,10 +39,10 @@ int main(void)
 	
 	board_init();
 		
-	sei();							// Enable interrupts
+	sei();									// Enable interrupts
 	
 	// Set up the external interrupt	
-	MCUCR |= (1 << ISC01) | (1 << ISC00);	// set INT0 to trigger on a rising edge
+	MCUCR |= (1 << ISC01);					// set INT0 to trigger on a falling edge
 	GIMSK |= (1 << INT0);					// enable the external interrupt
 	GIFR |= (1 << INTF0);					// clear the external interrupt flag
 	
@@ -113,5 +113,5 @@ void board_init(void)
 	DIDR0 = 0x01;
 
 	PORTA = 0xFE;	// enable pull-ups on PA7 - PA1
-	PORTB = 0x0B;	// enable pull-ups on PB3, PB1, PB0
+	PORTB = 0x04;	// enable pull-up on PB2 (INT0)
 }
