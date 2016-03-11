@@ -26,6 +26,7 @@
 
 volatile uint16_t	reference=0;
 volatile uint16_t	sample=0;
+volatile uint8_t	reference_flag=1; // set to 1 so a reference value is stored on first pass
 
 void board_init(void);
 uint16_t get_ADC_sample(void);
@@ -55,6 +56,13 @@ int main(void)
 		sample += get_ADC_sample();
 		sample = sample >> 2;			// divide by 4 to average the samples
 		
+		// If the reference flag is set, store the current
+		// current averaged ADC sample as the reference value.
+		if(reference_flag) {
+			reference = sample;
+			reference_flag=0;
+		}
+				
 		// The 'deviation' variable isn't being used for anything in this example,
 		// it's simply storing the difference between the reference value and
 		// the current sample value.
@@ -73,9 +81,7 @@ uint16_t get_ADC_sample(void)
 	ADCSRA |= (1 << ADSC);
 	
 	// wait for the conversion to complete
-	while ((ADCSRA & 0x40) == 0x40) {
-		asm("nop");
-	}
+	while (ADCSRA & (1 << ADSC)) ;
 	
 	// return the ADC value
 	return(ADC);
@@ -85,19 +91,8 @@ uint16_t get_ADC_sample(void)
 /* External interrupt vector */
 ISR(EXT_INT0_vect)
 {
-	uint8_t	i;
-	uint16_t value;
-	
-	// get the reference value by averaging several samples
-	reference = 0;
-	value = get_ADC_sample();	// get one sample and discard it
-	
-	for(i=0 ; i < 4 ; i++) {
-		value = get_ADC_sample();
-		reference += value;
-	}
-	
-	reference = (reference >> 2);
+	// set the flag to indicate an ADC reference value should be stored
+	reference_flag = 1;
 }
 
 
